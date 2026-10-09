@@ -23,10 +23,9 @@ try:
 except ImportError:
     genai = None
 
-DEFAULT_PROXY_BASE_URL = "http://35.220.164.252:3888/v1/chat/completions"
+DEFAULT_PROXY_BASE_URL = 
 OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1/chat/completions"
-NVIDIA_BASE_URL = "https://inference-api.nvidia.com/v1/chat/completions"
-NVIDIA_DEFAULT_MODEL = "azure/openai/gpt-4o"
+
 SHARE_KEY_PATH = os.path.join(os.path.dirname(__file__), "share_key.txt")
 LEGACY_MODEL_NAMES = {"chatgpt", "llama", "gemini", "deepseek"}
 #openai/openai/gpt-5.4
