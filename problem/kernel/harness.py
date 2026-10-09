@@ -6,16 +6,10 @@ Design notes
   and the anti-reward-hacking checks stay in force. We never time kernels
   ourselves.
 * The image must be ``sol-execbench:fixed`` (the stock image ships a broken
-  Triton install; see Tianhe_workspace/ROADMAP.md).
+  Triton install; see ***_workspace/ROADMAP.md).
 * A candidate is a single Python source file implementing ``run(...)``. Both
   ``triton`` and ``pytorch`` solutions fit that shape. Multi-file CUDA C++ is a
-  later extension.
-* 并发模型（2026-08-27 校验后定型）: 默认走长驻容器（eval_mode="persistent"），
-  锁频只在容器启动/退出时各发生一次，评测按 CUDA_VISIBLE_DEVICES 钉卡、
-  按卡上锁——不同卡上的 run 可以并行。校验数据: 8 卡并发 vs 单卡独测，
-  错峰启动下逐卡 geomean 偏差 +0.1%~+1.5%（同刻启动会污染小 workload，
-  但生产中各 run 相位天然随机）。旧的"每评测一容器 + 全机串行"模式保留为
-  eval_mode="container"，仅作回退。
+
 """
 
 from __future__ import annotations
@@ -31,7 +25,7 @@ from contextlib import contextmanager
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional
 
-SOL_ROOT = os.path.abspath(os.environ.get("SOL_EXECBENCH_ROOT", "/localhome/local-tianhej/SOL-ExecBench"))
+SOL_ROOT = os.path.abspath(os.environ.get("SOL_EXECBENCH_ROOT", "/localhome/local-***j/SOL-ExecBench"))
 CONTAINER_ROOT = "/sol-execbench"
 DEFAULT_IMAGE = "sol-execbench:fixed"
 

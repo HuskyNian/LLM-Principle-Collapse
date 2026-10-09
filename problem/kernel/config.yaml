@@ -1,6 +1,6 @@
 exper_name: "kernel_pilot"
 description: "GPU kernel optimization on SOL-ExecBench, pilot run"
-save_dir: "/localhome/local-tianhej/exllm_results/kernel"
+save_dir: "/localhome/local-***j/exllm_results/kernel"
 save_suffix: "pilot"
 
 # --- problem selection -----------------------------------------------------
@@ -35,7 +35,7 @@ eval_compile_timeout_s: 300
 # --- objectives ------------------------------------------------------------
 goals: [latency]
 optimization_direction: [min]
-prompt_info_path: /localhome/local-tianhej/principle_collapse/problem/kernel/prompt_info.yaml
+prompt_info_path: /localhome/local-***j/principle_collapse/problem/kernel/prompt_info.yaml
 evalutor_path: problem.kernel.evaluator   # misspelling is load-bearing
 
 # --- search ----------------------------------------------------------------
@@ -64,10 +64,10 @@ use_hint: False
 delay_hint: False
 delay_hint_source_suffix: pilot
 delay_hint_fraction: 0.4
-hint_path: /localhome/local-tianhej/principle_collapse/principle_intervention_hints.yaml
+hint_path: /localhome/local-***j/principle_collapse/principle_intervention_hints.yaml
 hint_key: kernel_mla_decode   # must be explicit: _infer_hint_key has no kernel branch
 
-# --- kernel-specific search tweaks (2026-08-27, 方向性同意、细节待 Tianhe 确认) ---
+
 error_feedback: true          # 把最近失败的错误摘要回传进 prompt（分子任务默认关）
 error_feedback_window: 3      # 回传最近几条失败
 experience_start: 20          # 累计多少个有效候选后开始生成 experience 总结（框架默认 100）

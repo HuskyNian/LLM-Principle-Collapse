@@ -73,22 +73,7 @@ def _resolve_problem_dir(problem_name: str) -> str:
 
 
 def generate_initial_population(config, seed) -> List[str]:
-    """提供初始种群。框架契约: 返回字符串列表，每个字符串 = 一个初始候选的
-    "基因"（对 kernel 任务就是一份完整 Python 源码），框架会把每个字符串
-    包成 Item 对象。
-
-    ``init_mode`` 三种模式:
-      * ``reference``（默认）—— 返回一个元素: 题目自带 reference.py 的
-        **源码文本**（下面的 reference_src 就是把那个文件 read() 进来的字符串，
-        即朴素 PyTorch 实现的代码本身）。这样所有 run 从同一个中性、未优化的
-        起点出发，之后轨迹里出现的任何设计路线都是优化器自己走出来的，
-        不是我们喂的。只返回 1 份是因为框架按字符串去重，返回 50 份一样的
-        也会塌成 1 个个体；不足 pop_size 的部分由框架的 llm_init 用
-        backbone 现场生成补齐。
-      * ``llm`` —— 返回空列表 []。框架看到空列表会转而让 backbone 从零
-        生成整个初始种群（= 直接采样模型先验作为起点，留作对照实验用）。
-      * ``files`` —— 从 ``init_seed_paths`` 指定的文件读种子（自定义起点）。
-    """
+    
     mode = _cfg(config, "init_mode", "reference")
     pop_size = int(_cfg(config, "optimization.pop_size", 20))
 
@@ -123,23 +108,7 @@ def generate_initial_population(config, seed) -> List[str]:
 
 
 class RewardingSystem:
-    """kernel 任务的评测打分器（ExLLM 的"问题接口"）。
-
-    它是什么: ExLLM 框架对每个问题只认两样东西——generate_initial_population
-    函数和一个叫 RewardingSystem 的类。框架启动时按 config 里的
-    `evalutor_path` 动态 import 本模块并实例化本类（model/MOLLM.py:83-86），
-    存为 MOO 里的 self.reward_system；此后每一代进化，框架把整批新候选
-    交给 reward_system.evaluate() 打分。分子任务的同名类算 5 个分子性质；
-    我们这个类做的是: 编译 + 上真卡计时 + 数值校验 + 打分。
-
-    打分是刻意的临时方案: 原始耗时全部记录在 original_results 和
-    checkpoint 里，阶段 4 无论换什么锚点都可以离线重算，不用重跑实验。
-    transformed 分数 = 对 T_ref 的 log 加速比压到 [0,1] 并翻成"越小越好"
-    ——因为框架的 NSGA-II 支配比较和 hypervolume 参考点 1.1
-    (model/util.py:54-64, 148-153) 把"[0,1] 最小化"这个约定写死了。
-    取 log 是因为这些题的耗时横跨三个数量级，线性归一会把所有正常候选
-    挤进一条缝里，轨迹失去分辨率。
-    """
+    
 
     def __init__(self, config=None):
         self.config = config
@@ -189,17 +158,14 @@ class RewardingSystem:
         self.timeout_s = int(_cfg(config, "eval_timeout_s", 300))
         self.compile_timeout_s = int(_cfg(config, "eval_compile_timeout_s", 300))
 
-        # 去重集合: 存 canonical_key 指纹（见 harness.canonical_key 的注释）。
-        # 没有它 repeated_num 恒为 0、uniqueness 恒为 1，候选层多样性指标失真。
+    
         self.history: set = set()
 
-        # 最近失败记录（错误回传用，见 get_error_feedback）。deque(maxlen=N)
-        # 是个定长队列: 塞满后再 append 会自动挤掉最旧的一条。
+    
         self.error_feedback = bool(_cfg(config, "error_feedback", False))
         self.recent_failures: deque = deque(
             maxlen=int(_cfg(config, "error_feedback_window", 3)))
-        # 单条错误信息注入 prompt 的长度上限（完整注入是原则，上限只是
-        # 防极端长日志撑爆 prompt 的保险，超限时会标注 [truncated]）
+ 
         self.error_feedback_max_chars = int(_cfg(config, "error_feedback_max_chars", 2000))
 
         self.eval_log_path = os.path.join(self.workdir, "eval_log.jsonl")
@@ -425,14 +391,7 @@ class RewardingSystem:
         self.recent_failures.append({"status": ev.status, "intent": intent, "err": err})
 
     def get_error_feedback(self) -> str:
-        """供框架在生成 prompt 后追加的"最近失败摘要"。
-
-        背景: ExLLM 原本把无效候选静默丢弃，模型永远看不到自己错在哪，
-        pilot 里近半预算耗在盲试错上。kernel 领域的搜索系统（K-Search 等）
-        普遍把错误文本回传。此机制由 config `error_feedback` 开关控制，
-        分子任务默认关闭、行为不变；开启后由 algorithm/MOO.py 的
-        mutation/crossover 在 prompt 末尾追加本函数的返回值。
-        """
+      
         if not self.error_feedback or not self.recent_failures:
             return ""
         lines = ["", "Recent failed attempts on this problem (avoid repeating these mistakes):"]

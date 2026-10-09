@@ -1,6 +1,6 @@
 exper_name: "kernel_smoke"
 description: "connectivity test: minimal end-to-end run on the cheapest problem"
-save_dir: "/localhome/local-tianhej/exllm_results/kernel"
+save_dir: "/localhome/*/exllm_results/kernel"
 save_suffix: "smoke"
 
 problem_name: "025_rmsnorm_h4096"
@@ -20,7 +20,7 @@ eval_compile_timeout_s: 300
 
 goals: [latency]
 optimization_direction: [min]
-prompt_info_path: /localhome/local-tianhej/principle_collapse/problem/kernel/prompt_info.yaml
+prompt_info_path: /*/principle_collapse/problem/kernel/prompt_info.yaml
 evalutor_path: problem.kernel.evaluator
 
 model:
@@ -44,7 +44,7 @@ early_stopping: False
 use_hint: False
 delay_hint: False
 
-# --- kernel-specific search tweaks (2026-08-27, 方向性同意、细节待 Tianhe 确认) ---
+# --- kernel-specific search tweaks 
 error_feedback: true          # 把最近失败的错误摘要回传进 prompt（分子任务默认关）
 error_feedback_window: 3      # 回传最近几条失败
 experience_start: 20          # 累计多少个有效候选后开始生成 experience 总结（框架默认 100）
