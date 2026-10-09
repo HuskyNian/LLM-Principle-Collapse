@@ -1,0 +1,32 @@
+{
+ "025_rmsnorm_h4096": {
+  "expert_ms": 0.016238,
+  "n_workloads": 14,
+  "source_solution": "flashinfer_wrapper_2e27cd",
+  "note": "trace event-timing; full workloads"
+ },
+ "018_mla_paged_decode_h16_ckv512_kpe64_ps1": {
+  "expert_ms": 0.032854,
+  "n_workloads": 47,
+  "source_solution": "flashinfer_wrapper_03f7b0",
+  "note": "trace event-timing; full workloads"
+ },
+ "012_gqa_paged_decode_h32_kv4_d128_ps1": {
+  "expert_ms": 0.030093,
+  "n_workloads": 8,
+  "source_solution": "flashinfer_wrapper_78fd04",
+  "note": "trace event-timing; subset-matched"
+ },
+ "019_mla_paged_prefill_causal_h16_ckv512_kpe64_ps1": {
+  "expert_ms": 0.097078,
+  "n_workloads": 8,
+  "source_solution": "flashinfer_wrapper_ea3787",
+  "note": "trace event-timing; subset-matched"
+ },
+ "020_moe_fp8_block_scale_ds_routing_topk8_ng8_kg4_e32_h7168_i2048": {
+  "expert_ms": 0.25971,
+  "n_workloads": 8,
+  "source_solution": "flashinfer_moe",
+  "note": "trace event-timing; subset-matched"
+ }
+}

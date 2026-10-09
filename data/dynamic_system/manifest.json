@@ -1,0 +1,16 @@
+{
+  "fullstate-dolphin-doublewell.npy": {
+    "sha256": "690a63fc286bead30a3a50616a390d6516db098a619adbcfc662af8d27cb6ee2",
+    "shape": [
+      100,
+      62
+    ]
+  },
+  "fullstate-residence_hall-genereg.npy": {
+    "sha256": "aa9d35fb3a21020f6dca6fe322d61f7ca4b27225dc6cd9bf4eb2b01b41defe4a",
+    "shape": [
+      100,
+      217
+    ]
+  }
+}

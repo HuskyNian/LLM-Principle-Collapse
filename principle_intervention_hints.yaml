@@ -1,0 +1,189 @@
+molecule_optimization:
+  title: "Molecule Optimization"
+  hint: >-
+    Search around compact heteroaryl-amide chemotypes rather than only refining
+    generic benzamide or para-methoxy aryl-amide families. Favor
+    low-synthetic-complexity molecules with a small sulfur-containing or
+    heteroaromatic ring, a simple aryl/benzyl partner, and light substituent
+    tuning to keep QED high while driving the unwanted target probabilities
+    near zero. 
+
+dynamic_system_dolphin:
+  title: "Dynamic System: Dolphin"
+  hint: >-
+    A direction is a
+    heterogeneous degree profile: include one low-degree or leaf-like sentinel
+    and combine it with low-to-mid and moderate/high-role nodes whose errors
+    complement each other as a set. 
+
+dynamic_system_residence_hall:
+  title: "Dynamic System: Residence Hall"
+  hint: >-
+    Look for five sentinels that jointly cover different network roles across
+    degree and neighborhood structure. Try heterogeneous
+    complementarity, try a mixed low/mid/moderately-high profile and test replacements
+    that preserve that role coverage.
+
+# ---------------------------------------------------------------------------
+# Kernel task. Three hint strengths per problem:
+#   L1  negative hint (shared by all problems): "the current approach is a
+#       local optimum, change the decomposition" -- names no direction
+#   L2  positive principle: names the route, gives no implementation
+#   L3  principle + implementation outline: steps / layouts / tiles, no code
+# Keys: kernel_L1_negative, kernel_<problem-id>_L2, kernel_<problem-id>_L3.
+# The expert anchor for every problem is the FlashInfer library call
+# (SOL-ExecBench/data/flashinfer-trace/solutions/*/flashinfer_wrapper_*.json,
+# not installed inside the evaluation container); L2/L3 describe what those
+# library kernels do internally: flash-decoding split-KV with LSE merge and
+# head packing for decode, FA-style 2-D tiling for prefill, FP8 block-scale
+# grouped GEMM for MoE.
+# ---------------------------------------------------------------------------
+kernel_L1_negative:
+  title: "Kernel: negative hint (all problems)"
+  hint: >-
+    Note from the evaluation team: on this problem, optimization trajectories
+    typically settle early on one overall design approach whose latency stays
+    far above what this hardware allows, and further refinement within that
+    approach does not close the gap. Whenever the implementations you are shown
+    share the same overall algorithmic decomposition, do not keep tuning it.
+    Propose a candidate whose decomposition of the computation is fundamentally
+    different from all of them; parameter tuning, fusion of the same steps, or
+    restructuring within the same approach will not be enough.
+
+kernel_012_L2:
+  title: "GQA paged decode: principle"
+  hint: >-
+    A direction: instead of one program per (sequence, query head) that walks
+    the whole KV sequence serially, split each sequence's KV range into several
+    chunks processed by different programs in parallel, each producing partial
+    attention statistics (running max, normalizer, weighted output sum), and
+    merge the chunks afterwards with log-sum-exp rescaling. Also treat the query
+    heads that share one KV head as a single tile, so that KV is read once and
+    the score and output computations become matrix products suitable for
+    tensor cores.
+
+kernel_012_L3:
+  title: "GQA paged decode: principle + implementation outline"
+  hint: >-
+    A direction: split each sequence's KV range into chunks handled by different
+    programs in parallel (flash-decoding), pack the query heads that share a KV
+    head into one tile so KV is read once and the math runs on tensor cores,
+    then merge the chunk results with log-sum-exp rescaling. Outline: (1) choose
+    a chunk length and a grid over (sequence, KV head, chunk); programs whose
+    chunk lies beyond the sequence length exit early. (2) Chunk kernel: load the
+    group's query heads as a [heads_per_group, head_dim] tile; iterate the
+    chunk's KV positions in blocks, gather the K and V rows through kv_indices,
+    compute scores with a tensor-core dot of the query tile against the K block,
+    keep a per-head running max and normalizer (online softmax), accumulate
+    P·V with a second dot; write the partial max, normalizer and output tile to
+    scratch buffers indexed by (sequence, head, chunk). (3) Merge kernel per
+    (sequence, head): global max over chunks, rescale each chunk by
+    exp(chunk_max - global_max), sum normalizers and outputs, divide, and emit
+    the log-sum-exp. (4) Pick the chunk length from the KV lengths so that the
+    number of programs is a small multiple of the SM count; a single chunk is
+    fine for short sequences. Handle empty sequences.
+
+kernel_018_L2:
+  title: "MLA paged decode: principle"
+  hint: >-
+    A direction: instead of one program per (sequence, head) that walks the
+    whole KV sequence serially, split each sequence's KV range into several
+    chunks processed by different programs in parallel, each producing partial
+    attention statistics (running max, normalizer, accumulated output), and
+    merge the chunks afterwards with log-sum-exp rescaling. Since all 16 heads
+    attend to the same compressed KV, pack the heads as the row dimension of a
+    matrix product so that the score and output computations run on tensor
+    cores and each KV block is read once for all heads.
+
+kernel_018_L3:
+  title: "MLA paged decode: principle + implementation outline"
+  hint: >-
+    A direction: split each sequence's KV range into chunks handled by different
+    programs in parallel (flash-decoding), pack all 16 heads into one tile so
+    the compressed KV is read once and the math runs on tensor cores, then merge
+    the chunk results with log-sum-exp rescaling. Outline: (1) choose a chunk
+    length and a grid over (sequence, chunk); programs past the sequence's
+    length exit early. (2) Chunk kernel: load q_nope as a [16, 512] tile and
+    q_pe as [16, 64]; iterate the chunk's KV positions in blocks, gather the
+    compressed-KV rows [block, 512] and the rope rows [block, 64] through
+    kv_indices; scores = dot(q_nope, ckv^T) + dot(q_pe, kpe^T) scaled by
+    sm_scale; keep a per-head running max and normalizer (online softmax);
+    accumulate the output as dot(P, ckv) into a [16, 512] tile (the compressed
+    KV serves as both keys and values); write the partial max, normalizer and
+    output tile to scratch buffers indexed by (sequence, chunk). (3) Merge
+    kernel per sequence and head: global max over chunks, rescale each chunk by
+    exp(chunk_max - global_max), sum normalizers and outputs, divide, and emit
+    the log-sum-exp in the same base as the reference. (4) Pick the chunk
+    length so that sequences × chunks is a small multiple of the SM count; use a
+    single chunk for short sequences. Handle empty sequences.
+
+kernel_019_L2:
+  title: "MLA paged prefill (causal): principle"
+  hint: >-
+    A direction: treat the computation as a two-dimensional tiling — a block of
+    query tokens (with all 16 heads, which share the same compressed KV) against
+    a block of KV tokens — so that both the score computation and the output
+    accumulation are matrix products on tensor cores, with an online softmax
+    carried across KV blocks and the causal mask applied only where a block
+    crosses the diagonal (fully masked blocks are skipped). Very long sequences
+    can additionally be split along the KV dimension across programs and merged
+    with log-sum-exp rescaling. Avoid host-side loops over sequences and
+    per-token work.
+
+kernel_019_L3:
+  title: "MLA paged prefill (causal): principle + implementation outline"
+  hint: >-
+    A direction: a flash-attention style two-dimensional tiling of query blocks
+    against KV blocks with tensor-core matrix products and an online softmax,
+    causal blocks skipped, with an optional KV split across programs merged by
+    log-sum-exp. Outline: (1) grid over (query block within a sequence,
+    sequence); each program owns BLOCK_M query tokens and all 16 heads, so its
+    query tile is [BLOCK_M × 16, 576] (512 compressed + 64 rope dims), one row
+    per (token, head). (2) Loop over KV blocks of BLOCK_N tokens up to this
+    query block's causal limit; gather the compressed-KV rows [BLOCK_N, 512] and
+    rope rows [BLOCK_N, 64] via kv_indices; scores = dot(q_nope, ckv^T) +
+    dot(q_pe, kpe^T) in fp32; apply the causal mask only on the block that
+    crosses the diagonal (compare each row's absolute position with the KV
+    position); per-row running max and normalizer; accumulate the output as
+    dot(P in bf16, ckv) into a [rows, 512] tile. (3) Typical tiles: BLOCK_M of
+    16–64 tokens, BLOCK_N of 64–128, fp32 accumulation, two or three pipeline
+    stages. (4) For sequences whose KV is much longer than the query block,
+    split the KV range across programs and merge partial results with
+    log-sum-exp rescaling. (5) Write output [total_q, 16, 512] and the
+    log-sum-exp per (token, head) in the reference's convention.
+
+kernel_020_L2:
+  title: "MoE FP8 block-scale: principle"
+  hint: >-
+    A direction: do not dequantize the FP8 weights to fp32 or bf16 before the
+    GEMMs. Feed the FP8 activations and FP8 weights directly to tensor-core
+    matrix multiplies and apply the 128-block scales to the accumulator as the
+    K dimension is traversed. Group the tokens by expert once (a sort or
+    permutation with per-expert offsets) and run the per-expert GEMMs as one
+    grouped launch over (expert, tile) rather than a Python loop over experts,
+    fusing the SwiGLU between the two GEMMs and the top-k weighted reduction
+    after the second.
+
+kernel_020_L3:
+  title: "MoE FP8 block-scale: principle + implementation outline"
+  hint: >-
+    A direction: FP8 block-scaled grouped GEMM on tensor cores with fused
+    routing, dispatch, SwiGLU and weighted reduction — no fp32 dequantization
+    and no Python loop over experts. Outline: (1) Routing: sigmoid scores plus
+    bias, pick the top groups by their top-2 sums, then the top-8 experts,
+    normalize and multiply by the routed scaling factor. (2) Dispatch once:
+    sort the (token, expert) pairs by expert to get a permuted token index and
+    per-expert offsets (cumulative counts); only local experts matter.
+    (3) Grouped GEMM1: one launch with a grid over (expert, M-tile of that
+    expert's tokens, N-tile). For each 128-wide K block: load the activation
+    tile in FP8 by gathering rows through the permuted index, load the weight
+    tile in FP8, compute the block product on tensor cores with fp32
+    accumulation, and scale that block's contribution by the activation scale
+    of these rows and the weight scale of this (N-block, K-block) before adding
+    it to the accumulator. (4) Epilogue: SwiGLU (silu of the gate half times
+    the up half), then either quantize back to FP8 with fresh per-row-block
+    scales for GEMM2 or keep bf16 for GEMM2 if requantization is too costly.
+    (5) Grouped GEMM2 the same way; in its epilogue multiply by the token's
+    top-k weight and scatter-add into the output row. (6) Tile sizes on the
+    order of 64–128 tokens by 128 columns; pad each expert's token range to the
+    tile size instead of looping.

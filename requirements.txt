@@ -1,0 +1,19 @@
+pytdc
+pyyaml
+numpy==2.2.6
+pandas
+scikit-learn==1.2.2
+openai
+pymoo
+pygmo
+requests
+matplotlib
+#accelerate 0.33.0 requires numpy<2.0.0,>=1.17, but you have numpy 2.2.6 which is incompatible.
+#pytdc 1.1.14 requires cellxgene-census==1.15.0, but you have cellxgene-census 1.17.0 which is incompatible.
+#pytdc 1.1.14 requires datasets<2.20.0, but you have datasets 3.5.1 which is incompatible.
+#pytdc 1.1.14 requires huggingface_hub<1.0,>=0.20.3, but you have huggingface-hub 1.28.0 which is incompatible.
+#pytdc 1.1.14 requires numpy<2.0.0,>=1.26.4, but you have numpy 2.2.6 which is incompatible.
+#pytdc 1.1.14 requires scikit-learn==1.2.2, but you have scikit-learn 1.5.2 which is incompatible.
+#tokenizers 0.19.1 requires huggingface-hub<1.0,>=0.16.4, but you have huggingface-hub 1.28.0 which is incompatible.
+#transformers 4.43.4 requires huggingface-hub<1.0,>=0.23.2, but you have huggingface-hub 1.28.0 which is incompatible.
+#umap-learn 0.5.11 requires scikit-learn>=1.6, but you have scikit-learn 1.5.2 which is incompatible.

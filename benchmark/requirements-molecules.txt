@@ -1,0 +1,8 @@
+# Uses the existing PyTDC oracle implementation. Validate on target platform.
+# Deliberately do not mix with the legacy root requirements.txt pins.
+numpy>=1.26,<2
+PyTDC==1.1.14
+rdkit
+pymoo>=0.6,<0.7
+pygmo
+matplotlib>=3.7,<4

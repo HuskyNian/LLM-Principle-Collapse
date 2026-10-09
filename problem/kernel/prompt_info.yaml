@@ -1,0 +1,91 @@
+# Prompt fragments for the GPU kernel optimization problem.
+# Every key here is read by algorithm/PromptTemplate.py with self.info[...],
+# so a missing key raises KeyError. Ship '' rather than omitting.
+
+description: |
+  You are optimizing a single GPU kernel for an NVIDIA B200 (Blackwell, 148 SMs,
+  180 GB HBM3e). You will be shown a problem specification and one or more
+  existing implementations together with their measured performance. Your job is
+  to propose faster implementations that compute exactly the same result.
+
+  Each candidate is one self-contained Python file that defines a function
+  `run(...)` whose parameters match the problem's input names in order. The file
+  may use PyTorch and Triton. It is compiled and benchmarked on real hardware
+  against a reference implementation; a candidate that fails to compile, crashes,
+  or produces numerically incorrect output on any workload is discarded entirely.
+
+  Correctness is checked on every workload shape with fresh random inputs, so a
+  kernel that only handles some shapes is worthless. Output dtypes and shapes
+  must match the specification exactly.
+
+  {PROBLEM_SPEC}
+
+other_requirements: |
+  Hard requirements:
+  - Emit one complete, self-contained Python file per candidate. Include every
+    import. Do not reference helper code that is not in the file.
+  - Define exactly one top-level `run(...)`. Return the outputs; do not write
+    into caller-provided output buffers.
+  - Do not attempt to detect or short-circuit the benchmarking loop, cache
+    results across calls, patch timing functions, or spawn threads. Such
+    submissions are automatically rejected.
+  - Handle every workload shape, including the degenerate ones (batch size 1,
+    empty sequences).
+
+example_output: |
+  Wrap each candidate in <candidate></candidate> tags, containing only Python
+  source, with no markdown fences and no commentary:
+
+  <candidate>
+  import torch
+  import triton
+  import triton.language as tl
+
+  @triton.jit
+  def _my_kernel(X, Y, n, BLOCK: tl.constexpr):
+      pid = tl.program_id(0)
+      offs = pid * BLOCK + tl.arange(0, BLOCK)
+      mask = offs < n
+      x = tl.load(X + offs, mask=mask, other=0.0)
+      tl.store(Y + offs, x, mask=mask)
+
+  def run(x):
+      y = torch.empty_like(x)
+      n = x.numel()
+      _my_kernel[(triton.cdiv(n, 1024),)](x, y, n, BLOCK=1024)
+      return y
+  </candidate>
+
+# NOTE (experimental hygiene): these instructions must NOT enumerate the design
+# axes we later use to classify a candidate's principle. Naming them here would
+# hand the optimizer the very hypotheses whose autonomous discovery we are
+# measuring. Keep the wording at the level of "change the algorithm, not the
+# surface" and let the model decide what to change.
+
+mutation_instruction: |
+  Modify one of the implementations above so that it runs faster. Aim at the
+  algorithm, not the surface: renaming things, reformatting, or tweaking a
+  constant is not a mutation. Form your own judgement about what actually limits
+  this implementation on this hardware at these problem sizes, and change that.
+
+  Put your hypothesis in a one-line comment at the top of the file, in the form
+  "# Change: <what you changed and why you expect it to be faster>", then give
+  the complete modified file.
+
+crossover_instruction: |
+  Combine the implementations above into a new one. Work out where each parent is
+  strong and where it is weak, and build a candidate that keeps the strong parts.
+  Reproducing the faster parent with minor edits does not count.
+
+  Put a one-line comment at the top of the file in the form
+  "# Change: <what you took from each parent and why>", then give the complete file.
+
+# One entry per name in config.goals.
+latency: |
+  the measured kernel execution time in milliseconds, taken as the geometric
+  mean over all benchmark workloads (lower is better). It is pure GPU time
+  measured with CUPTI under locked clocks.
+
+speedup_vs_ref: |
+  how many times faster the candidate is than the naive PyTorch reference
+  implementation (higher is better).

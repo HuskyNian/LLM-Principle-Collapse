@@ -1,0 +1,122 @@
+{
+ "012_gqa_paged_decode_h32_kv4_d128_ps1": {
+  "axis": "num_kv_indices",
+  "uuids": [
+   "bc5abb2d-95bc-4f3f-94bb-41ff53aecd5d",
+   "7c1cf18e-6941-4bc2-8c37-e10140e1e64b",
+   "27ef153a-4d10-402a-998b-1922904e94b2",
+   "4b38a419-13ee-4a19-b89c-85e7677bc913",
+   "706341db-6ec9-456e-8c83-0a7d6dc15114",
+   "75643386-e1af-43d9-82bf-badbf5a9b877",
+   "f46ddc2e-1676-4619-bba9-b59cf1e784dc",
+   "7a7fc288-c6af-40ce-8b64-7a18408d3d25"
+  ],
+  "sizes": [
+   2,
+   64,
+   362,
+   5372,
+   18727,
+   33167,
+   46287,
+   61519
+  ],
+  "n_total": 48
+ },
+ "018_mla_paged_decode_h16_ckv512_kpe64_ps1": {
+  "axis": "num_kv_indices",
+  "uuids": [
+   "00cb2bc2-c7c7-43a1-b857-b516eb2ce061",
+   "a128f96f-583a-48cb-aceb-d70e0015aca3",
+   "e6bef587-9992-4a28-8339-f4a7c197d457",
+   "d0da33e2-2d94-42b5-be8a-09111f9f2649",
+   "373074ba-f398-4a23-b628-90778267ef79",
+   "c4e14a53-dad1-404e-ae4f-bbe3355d8504",
+   "c9ba5e7f-839b-446f-9c02-7ab25e23fb7e",
+   "60b29b12-9c97-44ea-b82b-765fd04e2a38",
+   "b15c7099-4863-4c19-a8c2-c8c7201f38f6",
+   "5bef8d88-0f74-4ccb-a256-b02842951df3"
+  ],
+  "sizes": [
+   8,
+   457,
+   1008,
+   2408,
+   5057,
+   9657,
+   16345,
+   33945,
+   51245,
+   75145
+  ],
+  "n_total": 47
+ },
+ "019_mla_paged_prefill_causal_h16_ckv512_kpe64_ps1": {
+  "axis": "total_q",
+  "uuids": [
+   "d30e4c23-bb35-4f61-adb9-2163db9f5ea7",
+   "71df32c9-6f0f-4499-8599-c632f94ca83e",
+   "ed999c80-d4d1-4952-b063-cd39dfbf5612",
+   "473e30ea-b329-4ef7-9961-7de140fd35da",
+   "f96b666d-373d-40ee-ad8d-0c3b74374558",
+   "22689bbd-cd9e-4251-a90e-a2d367ddb7d8",
+   "053a88a3-d024-4fbe-bc46-3f49d141de9f",
+   "a06f2653-81ce-449f-91dd-e5ae53a16b92"
+  ],
+  "sizes": [
+   1,
+   6,
+   22,
+   52,
+   138,
+   805,
+   6053,
+   16384
+  ],
+  "n_total": 38
+ },
+ "020_moe_fp8_block_scale_ds_routing_topk8_ng8_kg4_e32_h7168_i2048": {
+  "axis": "seq_len",
+  "uuids": [
+   "e05c6c03-5603-4a1c-b34c-dcce0ecaeea4",
+   "2e69caee-ae5c-473b-aa99-5dc6659829d4",
+   "6230e838-67ca-41dd-a9d6-6f36b7676c6b",
+   "76010cb4-f73c-4145-8365-8642a2ce99de",
+   "4822167c-dae5-4bb1-bb53-e4adb256245b",
+   "eedc63b2-c03b-4cf2-8d16-1f46566e3af7",
+   "8f1ff9f1-6747-41d1-a1d8-2868cdacf893",
+   "5e8dc11c-f2a9-42d5-8dce-9419cbf34d5d"
+  ],
+  "sizes": [
+   1,
+   15,
+   32,
+   54,
+   56,
+   59,
+   80,
+   14107
+  ],
+  "n_total": 19
+ },
+ "025_rmsnorm_h4096": {
+  "axis": "batch_size",
+  "uuids": [
+   "864d596c-a930-4fc4-b241-02e6a06e92cb",
+   "a497c980-9e07-44cc-80c6-fc647ab29e84",
+   "d9e317ac-cf73-4d56-94e0-11edfb536ff3",
+   "b010c7f2-801d-41c0-b5d0-be619ecb4090",
+   "d1337dc1-e869-4174-9dcc-0f68950d3fef",
+   "841b0afa-80fa-449a-9e1d-f294da92d02f"
+  ],
+  "sizes": [
+   1,
+   16,
+   63,
+   170,
+   10827,
+   14509
+  ],
+  "n_total": 14
+ }
+}

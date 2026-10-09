@@ -1,0 +1,47 @@
+exper_name: "dynamic_system"
+description: "sentinel node subset selection on dolphin doublewell"
+save_dir: "/Users/user/Projects/exllm_results/dynamic_system"
+save_suffix: "dolphin_doublewell"
+#openai/openai/gpt-5.4
+#azure/anthropic/claude-sonnet-5
+#nvidia/deepseek-ai/deepseek-v4-flash
+#azure/openai/gpt-4o
+#nvidia/qwen/qwen3.5-35b-a3b
+
+cal_div: False
+resume: False
+early_stopping: True
+
+use_hint: False
+delay_hint: False
+delay_hint_source_suffix: dolphin_doublewell
+delay_hint_fraction: 0.4
+hint_path: /Users/user/Projects/ExLLM/principle_intervention_hints.yaml
+hint_key: dynamic_system_dolphin
+
+model:
+  name: nvidia,openai/openai/gpt-5.4
+  prompt_module: Prompt
+  experience_prob: 0.5
+  crossover_prob: 0.8
+  mutation_prob: 0.2
+  explore_prob: 0.
+
+use_au: False
+
+network: dolphin # ba, er
+dynamics: doublewell # doublewell, SIS
+subset_size: 4
+initial_samples: 50
+allow_weights: False
+data_dir: /Users/user/Projects/ExLLM/problem/dynamic_system/python_data
+
+goals: [error]
+optimization_direction: [min]
+prompt_info_path: /Users/user/Projects/ExLLM/problem/dynamic_system/prompt_info.yaml
+### Important ###
+evalutor_path: problem.dynamic_system.evaluator
+
+optimization:
+  pop_size: 50
+  eval_budget: 3100 # 50 * 62

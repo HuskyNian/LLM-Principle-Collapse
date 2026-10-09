@@ -1,0 +1,28 @@
+{
+ "012_gqa_paged_decode_h32_kv4_d128_ps1": {
+  "t_ref_ms": 80.542536,
+  "n_workloads": 48,
+  "probe_solution_latency_ms": 0.182819
+ },
+ "018_mla_paged_decode_h16_ckv512_kpe64_ps1": {
+  "t_ref_ms": 5.767699,
+  "n_workloads": 47,
+  "probe_solution_latency_ms": 0.372379
+ },
+ "020_moe_fp8_block_scale_ds_routing_topk8_ng8_kg4_e32_h7168_i2048": {
+  "t_ref_ms": 18.076591,
+  "n_workloads": 19,
+  "probe_solution_latency_ms": 9.152679
+ },
+ "025_rmsnorm_h4096": {
+  "t_ref_ms": 0.12978,
+  "n_workloads": 14,
+  "probe_solution_latency_ms": 0.012204
+ },
+ "019_mla_paged_prefill_causal_h16_ckv512_kpe64_ps1_subset8": {
+  "t_ref_ms": 66.378941,
+  "n_workloads": 8,
+  "probe_solution_latency_ms": 1.326455,
+  "note": "8-workload subset (workload_subsets.json); use with workload_uuids set"
+ }
+}

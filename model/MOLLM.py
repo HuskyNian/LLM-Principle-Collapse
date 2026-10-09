@@ -1,0 +1,152 @@
+import yaml
+import json
+from model.LLM import LLM
+import os
+import pickle
+from algorithm.MOO import MOO
+import pandas as pd
+import importlib
+
+
+def append_save_suffix(base_suffix, extra_suffix):
+    parts = [str(x).strip("_") for x in [base_suffix, extra_suffix] if str(x or "").strip("_")]
+    return "_".join(parts)
+
+
+def save_suffix_has_part(save_suffix, part):
+    save_suffix = str(save_suffix or "").strip("_")
+    part = str(part or "").strip("_")
+    return f"_{part}_" in f"_{save_suffix}_"
+
+
+class ConfigLoader:
+    def __init__(self, config_path="config.yaml"):
+        config_path = os.path.join('problem',config_path)
+        self.config = self._load_config(config_path)
+
+    def _load_config(self, config_path):
+        with open(config_path, 'r') as file:
+            config = yaml.safe_load(file)
+        return config
+
+    def get(self, key, default=None):
+        keys = key.split('.')
+        value = self.config
+        for k in keys:
+            value = value.get(k, {})
+        if value == {}:
+            return default
+        return value
+    
+    def to_string(self, config=None, indent=0):
+        """Recursively format the configuration dictionary as a string."""
+        if config is None:
+            config = self.config
+        lines = []
+        for key, value in config.items():
+            if isinstance(value, dict):
+                lines.append(" " * indent + f"{key}:")
+                lines.append(self.to_string(value, indent + 2))
+            else:
+                lines.append(" " * indent + f"{key}: {value}")
+        return "\n".join(lines)
+
+class MOLLM:
+    def __init__(self, args,config='base.yaml',resume=False,eval=False,seed=42,objectives=None,directions=None):
+        if isinstance(config,str):
+            self.config = ConfigLoader(config)
+        else:
+            self.config = config
+        print('goals, directs',self.config.get('goals'),self.config.get('optimization_direction'))
+        if objectives is not None:
+            print(f'objectives  {objectives} directions {directions}')
+            self.config.config['goals'] = objectives
+            assert directions is not None
+            self.config.config['optimization_direction'] = directions
+            print('goals, directs',self.config.get('goals'),self.config.get('optimization_direction'))
+        if args.num_offspring is not None:
+            self.config.config['num_offspring'] = args.num_offspring
+        if args.so_selection_ratio is not None:
+            self.config.config['so_selection_ratio'] = args.so_selection_ratio
+        save_suffix = append_save_suffix(self.config.get('save_suffix', default=''), args.save_suffix)
+        if (
+            self.config.get('use_hint', default=False) or self.config.get('model.use_hint', default=False)
+        ) and not save_suffix_has_part(save_suffix, 'use_hint'):
+            save_suffix = append_save_suffix(save_suffix, 'use_hint')
+        if (
+            self.config.get('delay_hint', default=False) or self.config.get('model.delay_hint', default=False)
+        ):
+            save_suffix = append_save_suffix(save_suffix, 'delay')
+        if (
+            self.config.get('web_search', default=False) or self.config.get('model.web_search', default=False)
+        ) and not save_suffix_has_part(save_suffix, 'web_search'):
+            save_suffix = append_save_suffix(save_suffix, 'web_search')
+        self.config.config['save_suffix'] = save_suffix
+        self.property_list = self.config.get('goals')
+        if not eval:
+            module_path = self.config.get('evalutor_path')  # e.g., "molecules"
+            module = importlib.import_module(module_path)
+            RewardingSystem = getattr(module, "RewardingSystem")
+            self.reward_system = RewardingSystem(config=self.config)
+        self.llm = LLM(model = self.config.get('model.name'),config = self.config)
+        self.seed = seed
+        self.history = []
+        self.init_pops = []
+        self.final_pops = []
+        self.start_index = 0
+        self.save_dir = self.config.get('save_dir')
+        model_name = self.config.get('model.name')
+        if ',' in model_name:
+            model_name = model_name.split(',')[1]
+        self.save_dir = os.path.join(self.save_dir,model_name)
+        self.save_suffix = self.config.get('save_suffix')
+        self.resume = resume
+        self.save_path = os.path.join(self.save_dir,'_'.join(self.property_list) + '_' + self.save_suffix +'.pkl')
+        self.results = {
+            'mean success num': 0,
+            'mean success rate': 0,
+            'success num each problem': []
+        }
+    
+    def run(self):
+        if self.resume:
+            self.load_from_pkl(self.save_path)
+
+        moo = MOO(self.reward_system, self.llm,self.property_list,self.config,self.seed)
+        init_pops,final_pops = moo.run()
+        self.history.append(moo.history)
+        self.final_pops.append(final_pops)
+        self.init_pops.append(init_pops)
+
+        #self.evaluate() # evaluate self.final_pops and self.init_pops
+        #self.save_to_pkl(self.save_path)
+
+    def load_evaluate(self):
+        self.load_from_pkl(self.save_path)
+        r = self.evaluate()
+        print(r)
+
+
+    def save_to_pkl(self, filepath,i=0):
+        data = {
+            'history':self.history,
+            'init_pops':self.init_pops,
+            'final_pops':self.final_pops,
+            'evaluation':self.results,
+            'properties':self.property_list
+        }
+        with open(filepath, 'wb') as f:
+            pickle.dump(data, f)
+        if i% 10==0:
+            print(f"Data saved to {filepath}")
+
+    def load_from_pkl(self,filepath):
+        with open(filepath, 'rb') as f:
+            obj = pickle.load(f)
+        self.history = obj['history']
+        self.init_pops = obj['init_pops']
+        self.final_pops = obj['final_pops']
+        self.start_index = len(obj['init_pops'])
+        print(f"Data loaded from {filepath}")
+        return obj
+        

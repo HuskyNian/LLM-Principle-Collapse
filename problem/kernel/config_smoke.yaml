@@ -1,0 +1,50 @@
+exper_name: "kernel_smoke"
+description: "connectivity test: minimal end-to-end run on the cheapest problem"
+save_dir: "/localhome/local-tianhej/exllm_results/kernel"
+save_suffix: "smoke"
+
+problem_name: "025_rmsnorm_h4096"
+kernel_language: "triton"
+run_tag: "smoke_025"
+score_log_decades: 3.0
+workload_uuids: null
+init_mode: "reference"
+
+eval_mode: "persistent"
+eval_image: "sol-execbench:fixed"
+eval_gpu: "0"
+eval_warmup_runs: 10
+eval_iterations: 50
+eval_timeout_s: 300
+eval_compile_timeout_s: 300
+
+goals: [latency]
+optimization_direction: [min]
+prompt_info_path: /localhome/local-tianhej/principle_collapse/problem/kernel/prompt_info.yaml
+evalutor_path: problem.kernel.evaluator
+
+model:
+  name: nvidia,azure/openai/gpt-4o
+  prompt_module: Prompt
+  experience_prob: 0.5
+  crossover_prob: 0.8
+  mutation_prob: 0.2
+  explore_prob: 0.
+
+optimization:
+  pop_size: 5
+  eval_budget: 12
+
+budget_metric: attempts
+use_au: False
+cal_div: False
+candidate_noun: "kernel implementations"
+resume: False
+early_stopping: False
+use_hint: False
+delay_hint: False
+
+# --- kernel-specific search tweaks (2026-08-27, 方向性同意、细节待 Tianhe 确认) ---
+error_feedback: true          # 把最近失败的错误摘要回传进 prompt（分子任务默认关）
+error_feedback_window: 3      # 回传最近几条失败
+experience_start: 20          # 累计多少个有效候选后开始生成 experience 总结（框架默认 100）

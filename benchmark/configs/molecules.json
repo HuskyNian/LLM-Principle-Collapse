@@ -1,0 +1,8 @@
+{
+  "version": "benchmark-v1", "task": "molecules", "budget": 5000,
+  "budget_metric": "unique_valid", "selection": "nsga2_so", "selection_size": 50,
+  "reference": 4.698537399, "reference_kind": "attainable_best_known",
+  "gap_fitness_below": 4.3, "epsilon": 0.01, "epsilon_mode": "absolute",
+  "narrowing_max": 3.0, "remaining_fraction": 0.3, "window_attempts": 1000,
+  "text_dominant_min": 0.5, "text_minor_updates_max": 5
+}

@@ -1,0 +1,9 @@
+{
+  "version": "benchmark-v1", "task": "dolphin", "budget": 3100,
+  "budget_metric": "unique_valid", "selection": "nsga2_so", "selection_size": 50,
+  "reference": 0.0040408268179436746, "reference_kind": "exhaustive_global_optimum",
+  "dynamics": "doublewell", "num_nodes": 62, "subset_size": 4,
+  "gap_ratio_min": 2.0, "epsilon": 0.01, "epsilon_mode": "relative_error",
+  "narrowing_max": 31.348461256, "remaining_fraction": 0.3, "window_attempts": 1000,
+  "text_dominant_min": 0.5, "text_minor_updates_max": 5
+}

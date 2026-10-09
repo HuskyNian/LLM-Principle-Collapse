@@ -1,0 +1,13 @@
+{
+  "decision_tree.png": "paper/principle_collapse/results_v4/collapse_diagnosis_decision_tree_simplified.png",
+  "decision_tree_full.png": "paper/principle_collapse/results_v4/collapse_diagnosis_decision_tree.png",
+  "molecular_convergence.png": "paper/principle_collapse/results_v4/molecular_top1.png",
+  "residence_hall_convergence.png": "paper/principle_collapse/results_v4/residence_hall_top1_effective_nodes.png",
+  "dolphin_convergence.png": "paper/principle_collapse/results_v4/dolphin_top1_effective_nodes.png",
+  "kernel_convergence.png": "paper/principle_collapse/paper_review/figs/kernel/kernel_budget_curves.png",
+  "molecular_early_late.png": "paper/principle_collapse/results_v4/molecular_bars.png",
+  "residence_hall_early_late.png": "paper/principle_collapse/results_v4/residence_hall_bars.png",
+  "dolphin_early_late.png": "paper/principle_collapse/results_v4/dolphin_bars.png",
+  "kernel_early_late.png": "paper/principle_collapse/paper_review/figs/kernel/kernel_early_late_bars.png",
+  "molecular_hint_convergence.png": "analysis/molecules/top1_convergence_by_budget.png"
+}

@@ -1,0 +1,16 @@
+
+__pycache__/
+.ipynb_checkpoints/
+*.sh
+*.pdf
+analysis/
+overleaf.md
+.DS_Store
+problem/dynamic_system/convert_rds_to_python.R
+model/share_key.txt
+model/keys.txt
+slurm_logs/
+paper/
+.env
+.venv/
+outputs/

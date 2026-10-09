@@ -1,0 +1,90 @@
+# Write a description for your problem
+description: |
+  Select 4 sentinel nodes from the dolphin network to approximate the full-network average state under doublewell dynamics.
+  The network has 62 nodes and 159 edges. Node IDs are 1-based integers from 1 to 62.
+  Each candidate should use structurally diverse nodes from the table below.
+  Node feature columns: id, degree k, average nearest-neighbor degree knn, local clustering lcl, closeness centrality cc, betweenness centrality bc, k-core index kcore.
+  Node features:
+  id,k,knn,lcl,cc,bc,kcore
+  1,6,7.333,0.267,0.363,0.0224,4
+  2,7,6.286,0.524,0.252,0.0209,4
+  3,5,6.200,0.400,0.313,0.0161,4
+  4,8,6.250,0.500,0.271,0.0528,4
+  5,12,6.750,0.258,0.377,0.0620,4
+  6,7,6.429,0.238,0.339,0.0333,4
+  7,6,9.500,0.600,0.330,0.0033,4
+  8,9,5.333,0.222,0.310,0.1143,4
+  9,7,8.286,0.524,0.337,0.0149,4
+  10,4,6.250,0.500,0.316,0.0133,4
+  11,9,6.222,0.139,0.391,0.1026,4
+  12,6,9.667,0.533,0.333,0.0127,4
+  13,1,9.000,0.000,0.237,0.0000,1
+  14,6,9.333,0.533,0.313,0.0074,4
+  15,3,5.667,0.667,0.255,0.0016,3
+  16,3,5.333,0.667,0.277,0.0044,3
+  17,5,5.600,0.400,0.316,0.0292,3
+  18,5,6.800,0.300,0.365,0.0668,4
+  19,9,6.333,0.250,0.323,0.0655,4
+  20,5,5.200,0.300,0.323,0.0331,4
+  21,1,9.000,0.000,0.237,0.0000,1
+  22,3,5.333,0.333,0.216,0.0328,2
+  23,10,7.100,0.333,0.365,0.0572,4
+  24,5,7.800,0.300,0.316,0.0327,3
+  25,1,9.000,0.000,0.245,0.0000,1
+  26,7,6.571,0.048,0.418,0.2482,4
+  27,11,7.364,0.236,0.399,0.1386,4
+  28,8,6.625,0.286,0.330,0.0454,4
+  29,2,8.000,0.000,0.335,0.0705,2
+  30,8,7.750,0.250,0.404,0.1431,4
+  31,5,7.800,0.600,0.298,0.0233,4
+  32,6,5.500,0.333,0.330,0.0292,4
+  33,7,7.714,0.238,0.337,0.0628,4
+  34,4,6.500,0.167,0.311,0.0120,3
+  35,11,7.000,0.309,0.347,0.0407,4
+  36,2,4.500,0.000,0.256,0.0030,2
+  37,6,6.000,0.400,0.339,0.0232,4
+  38,2,3.500,0.000,0.247,0.0009,2
+  39,7,9.143,0.238,0.351,0.0334,4
+  40,10,5.300,0.244,0.330,0.0847,4
+  41,4,9.250,0.333,0.343,0.0192,4
+  42,2,5.000,0.000,0.260,0.0012,2
+  43,7,6.429,0.381,0.324,0.0991,4
+  44,2,8.500,0.000,0.271,0.0009,2
+  45,2,5.000,0.000,0.213,0.0001,2
+  46,9,5.444,0.361,0.302,0.0842,4
+  47,1,8.000,0.000,0.249,0.0000,1
+  48,5,6.800,0.300,0.343,0.0203,4
+  49,1,3.000,0.000,0.178,0.0000,1
+  50,3,5.667,0.000,0.302,0.0142,2
+  51,3,7.667,0.333,0.308,0.0024,3
+  52,4,6.500,0.500,0.238,0.0044,3
+  53,6,7.000,0.533,0.268,0.0294,4
+  54,6,7.333,0.333,0.347,0.0191,4
+  55,4,4.500,0.167,0.282,0.0091,3
+  56,8,5.625,0.143,0.372,0.2133,4
+  57,5,5.800,0.200,0.365,0.1182,4
+  58,1,10.000,0.000,0.269,0.0000,1
+  59,3,9.333,0.333,0.333,0.0422,3
+  60,1,10.000,0.000,0.249,0.0000,1
+  61,1,10.000,0.000,0.249,0.0000,1
+  62,1,9.000,0.000,0.233,0.0000,1
+
+# This part is important, you should set your output format here, and probably give an simple example. The <candidate></candidate> is fixed.
+example_output: 'Each output new candidate must start with <candidate> and end with
+  </candidate>. Example one output for format only, not a recommendation:
+  <candidate>nodes = [1, 2, 3, 4]</candidate>'
+
+# Optional mutation and crossover instrution, helpful for better operation, you should start with:"Example operations include: "
+mutation_instruction: 'Example operations include:
+  change one or more node IDs in the subset
+  '
+crossover_instruction: 'Example operations include:
+  combine node IDs from two candidate subsets
+  '
+
+# Optional, some extra requirements you would like to achieve
+other_requirements: Use exactly 4 unique node IDs. Node IDs are integers from 1 to 62.
+
+# The following part are the description of the objectives involved. It is simply consisted of a sentence describe the objective and [optional] normally 
+# what operation could cause a rise or drop. 
+error: The objective is the approximation error between the selected sentinel-node average and the full network average. Lower error is better.

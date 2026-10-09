@@ -1,0 +1,9 @@
+{
+  "version": "benchmark-v1", "task": "residence_hall", "budget": 10850,
+  "budget_metric": "unique_valid", "selection": "nsga2_so", "selection_size": 50,
+  "reference": 2.38175444209538e-7, "reference_kind": "published_best_known",
+  "dynamics": "genereg", "num_nodes": 217, "subset_size": 5,
+  "gap_ratio_min": 2.0, "epsilon": 0.01, "epsilon_mode": "relative_error",
+  "narrowing_max": 31.925201288, "remaining_fraction": 0.3, "window_attempts": 1000,
+  "text_dominant_min": 0.5, "text_minor_updates_max": 5
+}

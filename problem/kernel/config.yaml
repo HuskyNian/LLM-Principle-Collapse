@@ -1,0 +1,73 @@
+exper_name: "kernel_pilot"
+description: "GPU kernel optimization on SOL-ExecBench, pilot run"
+save_dir: "/localhome/local-tianhej/exllm_results/kernel"
+save_suffix: "pilot"
+
+# --- problem selection -----------------------------------------------------
+problem_name: "018_mla_paged_decode_h16_ckv512_kpe64_ps1"
+kernel_language: "triton"
+run_tag: "018_pilot"
+
+# Geomean reference latency measured on this machine (see
+# SOL-ExecBench/out/pc_smoke/tref/). Fixed anchor: measuring it per-run would
+# make trajectories from different runs incomparable.
+t_ref_ms: 5.7677
+score_log_decades: 3.0
+
+# Restrict the workload set for the pilot. Leave null to use all workloads.
+# NEVER head-truncate for these problems: the leading workloads are the small
+# shapes where the expert-vs-LLM gap is smallest, so a prefix would hide the
+# headroom we are studying. Pick explicit uuids spanning the shape range.
+workload_uuids: null
+
+# --- initial population ----------------------------------------------------
+# reference | llm | files
+init_mode: "reference"
+
+# --- evaluation ------------------------------------------------------------
+eval_image: "sol-execbench:fixed"
+eval_gpu: "0"
+eval_warmup_runs: 10
+eval_iterations: 50
+eval_timeout_s: 300
+eval_compile_timeout_s: 300
+
+# --- objectives ------------------------------------------------------------
+goals: [latency]
+optimization_direction: [min]
+prompt_info_path: /localhome/local-tianhej/principle_collapse/problem/kernel/prompt_info.yaml
+evalutor_path: problem.kernel.evaluator   # misspelling is load-bearing
+
+# --- search ----------------------------------------------------------------
+model:
+  name: nvidia,openai/openai/gpt-5.4
+  prompt_module: Prompt
+  experience_prob: 0.5
+  crossover_prob: 0.5
+  mutation_prob: 0.5
+  explore_prob: 0.       # must stay 0: algorithm/MOO.py:193 explore() is a no-op that raises
+
+optimization:
+  pop_size: 10
+  eval_budget: 200       # ~1 min/eval on 018 -> ~3.5 h wall clock
+
+use_au: False
+cal_div: False           # True pulls in tdc.Evaluator('Diversity'), molecule-only
+candidate_noun: "kernel implementations"   # used in the experience wrapper text (MOO.py)
+resume: False
+early_stopping: True
+early_stopping_patience: 15
+
+# --- oracle principle intervention (phase 4) -------------------------------
+# The baseline arm must be run first under save_suffix == delay_hint_source_suffix.
+use_hint: False
+delay_hint: False
+delay_hint_source_suffix: pilot
+delay_hint_fraction: 0.4
+hint_path: /localhome/local-tianhej/principle_collapse/principle_intervention_hints.yaml
+hint_key: kernel_mla_decode   # must be explicit: _infer_hint_key has no kernel branch
+
+# --- kernel-specific search tweaks (2026-08-27, 方向性同意、细节待 Tianhe 确认) ---
+error_feedback: true          # 把最近失败的错误摘要回传进 prompt（分子任务默认关）
+error_feedback_window: 3      # 回传最近几条失败
+experience_start: 20          # 累计多少个有效候选后开始生成 experience 总结（框架默认 100）

@@ -1,0 +1,8 @@
+{
+  "version": "benchmark-v1", "task": "kernel", "budget": 200,
+  "budget_metric": "attempts", "selection": "fitness", "selection_size": 10,
+  "reference": null, "reference_kind": "hardware_matched_expert_latency_ms",
+  "gap_ratio_min": 2.0, "epsilon": 0.1, "epsilon_mode": "reference_gap",
+  "narrowing_max": 2.0, "remaining_fraction": 0.3, "window_attempts": 1000,
+  "text_dominant_min": 0.5, "text_minor_updates_max": 5
+}
